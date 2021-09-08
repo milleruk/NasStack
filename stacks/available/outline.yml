@@ -1,0 +1,50 @@
+services:
+  outline:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.outline.rule=Host(`wiki.$DOMAINNAME`)"
+      - "traefik.http.routers.outline.entrypoints=https"
+      - "traefik.http.services.outline.loadbalancer.server.port=3000"
+      - "traefik.http.routers.outline.middlewares=outline"
+      - "traefik.http.middlewares.outline.headers.customFrameOptionsValue=SAMEORIGIN"
+      - "traefik.http.middlewares.outline.headers.contentSecurityPolicy=frame-ancestors 'self' wiki.$DOMAINNAME $DOMAINNAME"
+      - "traefik.http.middlewares.outline.headers.stsSeconds=155520011"
+      - "traefik.http.middlewares.outline.headers.stsPreload=true"
+      - "traefik.http.middlewares.outline.headers.contentTypeNosniff=true"
+      - "traefik.http.middlewares.outline.headers.browserXSSFilter=true"
+    image: outlinewiki/outline
+    container_name: outline
+    command: sh -c "yarn sequelize:migrate --env production-ssl-disabled && yarn start"
+    environment:
+      - DATABASE_URL=
+      - REDIS_URL=
+      - SECRET_KEY=
+      - UTILS_SECRET=
+      - URL=https://wiki.$DOMAINNAME
+      - PORT=3000
+      - FORCE_HTTPS=false
+      - PGSSLMODE=disable
+      - AWS_ACCESS_KEY_ID=
+      - AWS_SECRET_ACCESS_KEY=
+      - AWS_S3_UPLOAD_BUCKET_NAME=outline
+      - AWS_S3_UPLOAD_BUCKET_URL=https://minio.$DOMAINNAME
+      - AWS_REGION=eu-central
+      - AWS_S3_UPLOAD_MAX_SIZE=26214400
+      - AWS_S3_FORCE_PATH_STYLE=true
+      - AWS_S3_ACL=private
+      - GOOGLE_CLIENT_ID=
+      - GOOGLE_CLIENT_SECRET=
+      - GOOGLE_ALLOWED_DOMAINS=$DOMAINNAME
+      - SMTP_HOST=mail.$DOMAINNAME
+      - SMTP_PORT=465
+      - SMTP_USERNAME=
+      - SMTP_PASSWORD=
+      - SMTP_FROM_EMAIL=
+      - SMTP_REPLY_EMAIL=
+    networks:
+      - containerProxy
+    depends_on:
+      - traefik
+      - redis
+      - postgres
+    restart: unless-stopped

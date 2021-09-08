@@ -1,0 +1,45 @@
+services
+  nextcloud:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nextcloud.rule=Host(`cloud.$DOMAINNAME`)"
+      - "traefik.http.routers.nextcloud.entrypoints=https"
+      - "traefik.http.services.nextcloud.loadbalancer.server.port=443"
+      - "traefik.http.services.nextcloud.loadbalancer.server.scheme=https"
+      - "traefik.http.routers.nextcloud.middlewares=nextcloud_redirect_dav,nextcloud_redirect_finger,nextcloud_redirect_nodeinfo,nextcloud"
+      - "traefik.http.middlewares.nextcloud.headers.customFrameOptionsValue=SAMEORIGIN"
+      - "traefik.http.middlewares.nextcloud.headers.contentSecurityPolicy=frame-ancestors 'self' $DOMAINNAME *.$DOMAINNAME"
+      - "traefik.http.middlewares.nextcloud.headers.stsSeconds=155520011"
+      - "traefik.http.middlewares.nextcloud.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.nextcloud.headers.stsPreload=true"
+      - "traefik.http.middlewares.nextcloud.headers.contentTypeNosniff=true"
+      - "traefik.http.middlewares.nextcloud.headers.browserXSSFilter=true"
+      - "traefik.http.middlewares.nextcloud_redirect_dav.redirectregex.regex=/.well-known/(card|cal)dav"
+      - "traefik.http.middlewares.nextcloud_redirect_dav.redirectregex.replacement=/remote.php/dav/"
+      - "traefik.http.middlewares.nextcloud_redirect_finger.redirectregex.regex=/.well-known/webfinger"
+      - "traefik.http.middlewares.nextcloud_redirect_finger.redirectregex.replacement=/public.php?service=webfinger"
+      - "traefik.http.middlewares.nextcloud_redirect_nodeinfo.redirectregex.regex=/.well-known/nodeinfo"
+      - "traefik.http.middlewares.nextcloud_redirect_nodeinfo.redirectregex.replacement=/public.php?service=nodeinfo"
+      - "ofelia.enabled=true"
+      - "ofelia.job-exec.file-scan.schedule=@every 30m"
+      - "ofelia.job-exec.file-scan.command=php /config/www/nextcloud/occ files:scan --all"
+      - "ofelia.job-exec.file-scan.user=1000"
+    image: nasstack/nextcloud
+    build:
+      dockerfile: Dockerfile
+      context: ./build/nextcloud
+    container_name: nextcloud
+    environment:
+      - PGID=$PGID
+      - PUID=$PUID
+      - TZ=$TZ
+    volumes:
+      - $CONTAINERDATADIR/nextcloud:/config
+      - $CONTAINERDATADIR/nextcloud/data:/data
+      - $DATADIR:/mnt/data
+    networks:
+      - containerProxy
+    depends_on:
+      - traefik
+      - ofelia
+    restart: unless-stopped

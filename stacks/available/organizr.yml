@@ -1,0 +1,21 @@
+services:
+  organizr:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.organizr.rule=Host(`$DOMAINNAME`)"
+      - "traefik.http.routers.organizr.entrypoints=https"
+      - "traefik.http.services.organizr.loadbalancer.server.port=80"
+    image: organizr/organizr
+    container_name: organizr
+    volumes:
+      - $CONTAINERDATADIR/organizr:/config
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      - branch=v2-master #v2-master or #v2-develop
+    networks:
+      - containerProxy
+    depends_on:
+      - traefik
+    restart: unless-stopped

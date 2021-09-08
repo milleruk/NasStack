@@ -1,0 +1,56 @@
+# Before running both containers, you need to start the mysqlspotweb container first, then run:
+# docker run -it --rm -p 8881:80 -e TZ='Europe/Copenhagen' --network=internet jgeusebroek/spotweb
+# And then go to http://<ip of server>:8881/install.php to install the database, then you can start the main container
+# Refer to https://hub.docker.com/r/jgeusebroek/spotweb for more info
+---
+services:
+  spotweb:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.spotweb.rule=Host(`spotweb.$DOMAINNAME`)"
+      - "traefik.http.routers.spotweb.entrypoints=https"
+      - "traefik.http.services.spotweb.loadbalancer.server.port=80"
+      - "ofelia.enabled=true"
+      - "ofelia.job-exec.spotweb-retrieve.schedule=@every 15m"
+      - "ofelia.job-exec.spotweb-retrieve.command=php /var/www/spotweb/retrieve.php"
+      - "ofelia.job-exec.spotweb-retrieve.user=www-data"
+    image: jgeusebroek/spotweb
+    container_name: spotweb
+    environment:
+      - TZ=$TZ
+      - SPOTWEB_DB_TYPE=pdo_mysql
+      - SPOTWEB_DB_HOST=127.0.0.1
+      - SPOTWEB_DB_PORT=3306
+      - SPOTWEB_DB_NAME=spotweb
+      - SPOTWEB_DB_USER=spotweb
+      - SPOTWEB_DB_PASS=spotweb
+    volumes:
+      - $CONTAINERDATADIR/spotweb:/config
+    network_mode: container:wireguard
+    depends_on:
+      - traefik
+      - wireguard
+      - ofelia
+      - mysqlspotweb
+    restart: unless-stopped
+
+  mysqlspotweb:
+    image: library/mariadb:10.5
+    container_name: mysqlspotweb
+    command: [mysqld, --character-set-server=utf8mb4, --collation-server=utf8mb4_unicode_ci, --default-authentication-plugin=mysql_native_password]
+    volumes:
+      - $CONTAINERDATADIR/mysqlspotweb:/var/lib/mysql
+      - $CONTAINERDIR/config/mysql:/etc/mysql/conf.d
+    environment:
+      - MYSQL_DATABASE=spotweb
+      - MYSQL_USER=spotweb
+      - MYSQL_PASSWORD=spotweb
+      - MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASS
+    networks:
+      - containerProxy
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 20s
+      retries: 10
+    restart: unless-stopped

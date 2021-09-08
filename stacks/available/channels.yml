@@ -1,0 +1,12 @@
+services:
+  channels:
+    image: fancybits/channels-dvr:latest
+    container_name: channels
+    network_mode: host
+    restart: unless-stopped
+    devices:
+      - /dev/dri:/dev/dri
+    volumes:
+      - $CONTAINERDATADIR/channels/config:/channels-dvr
+      - $CONTAINERDATADIR/channels/recordings:/shares/DVR
+      - $DATADIR:/data

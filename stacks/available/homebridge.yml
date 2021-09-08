@@ -1,0 +1,22 @@
+services:
+  homebridge:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.homebridge.rule=Host(`homebridge.$DOMAINNAME`)"
+      - "traefik.http.routers.homebridge.entrypoints=https"
+      - "traefik.http.services.homebridge.loadbalancer.server.port=7654"
+    image: oznu/homebridge
+    container_name: homebridge
+    volumes:
+      - $CONTAINERDATADIR/homebridge:/homebridge
+      - $CONTAINERDIR/logs/homebridge.log:/homebridge/homebridge.log
+    environment:
+      - TZ=$TZ
+      - PGID=$PGID
+      - PUID=$PUID
+      - HOMEBRIDGE_CONFIG_UI=1
+      - HOMEBRIDGE_CONFIG_UI_PORT=7654
+    network_mode: host
+    depends_on:
+      - traefik
+    restart: unless-stopped

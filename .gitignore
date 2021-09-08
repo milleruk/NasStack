@@ -1,0 +1,26 @@
+secrets/*
+.env
+
+data/*
+logs/*
+
+# Ignore enabled stacks
+stacks/enabled/*
+
+# Ignore certs directory since it's automatically kept up to date by extracting certs from traefik
+config/certs/*
+
+# Ignore Traefiks acme.json
+config/traefik/acme.json
+
+# Ignore Authelia configs
+config/authelia/configuration.yml
+config/authelia/users_database.yml
+config/authelia/db.sqlite3
+config/authelia/notifications.txt
+
+# Ignore docker-compose because we generate it
+docker-compose.yml
+
+# Ignore the middleware config
+config/traefik/rules/middlewares.yml

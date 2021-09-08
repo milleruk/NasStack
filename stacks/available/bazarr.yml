@@ -1,0 +1,23 @@
+services:
+  bazarr:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.bazarr.rule=Host(`bazarr.$DOMAINNAME`)"
+      - "traefik.http.routers.bazarr.entrypoints=https"
+      - "traefik.http.services.bazarr.loadbalancer.server.port=6767"
+    image: linuxserver/bazarr
+    container_name: bazarr
+    volumes:
+      - $CONTAINERDATADIR/bazarr:/config
+      - $DATADIR:/data
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+    network_mode: container:wireguard
+    depends_on:
+      - traefik
+      - wireguard
+      - sonarr
+      - radarr
+    restart: unless-stopped

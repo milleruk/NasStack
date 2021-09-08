@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: library/postgres:latest
+    container_name: postgres
+    volumes:
+      - $CONTAINERDATADIR/postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=$POSTGRES_ROOT_PASS
+    networks:
+      - containerProxy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

@@ -1,0 +1,23 @@
+services:
+  ombi:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ombi.rule=Host(`ombi.$DOMAINNAME`)"
+      - "traefik.http.routers.ombi.entrypoints=https"
+      - "traefik.http.services.ombi.loadbalancer.server.port=3579"
+    image: linuxserver/ombi
+    container_name: ombi
+    volumes:
+      - $CONTAINERDATADIR/ombi:/config
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+    networks:
+      - containerProxy
+    depends_on:
+      - traefik
+      - sonarr
+      - radarr
+      - lidarr
+    restart: unless-stopped

@@ -1,0 +1,13 @@
+services:
+  petio:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.petio.rule=Host(`petio.$DOMAINNAME`)"
+      - "traefik.http.routers.petio.entrypoints=https"
+      - "traefik.http.services.petio.loadbalancer.server.port=7777"
+    image: ghcr.io/petio-team/petio
+    container_name: petio
+    volumes:
+      - $CONTAINERDATADIR/petio/config:/app/api/config
+      - $CONTAINERDATADIR/petio/logs:/app/logs
+    restart: unless-stopped

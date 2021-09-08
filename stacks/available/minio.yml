@@ -1,0 +1,42 @@
+secrets:
+  minioAccessKey:
+    file: $SECRETSDIR/minioAccessKey
+  minioSecretKey:
+    file: $SECRETSDIR/minioSecretKey
+
+services:
+  minio:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.minio.rule=Host(`minio.$DOMAINNAME`)"
+      - "traefik.http.routers.minio.entrypoints=https"
+      - "traefik.http.services.minio.loadbalancer.server.port=9000"
+      - "traefik.http.routers.minio.middlewares=minio,minio-root-redirect"
+      - "traefik.http.middlewares.minio-root-redirect.redirectregex.regex=^https:\\/\\/([^\\/]+)\\/?$$"
+      - "traefik.http.middlewares.minio-root-redirect.redirectregex.replacement=https://$$1/index.html"
+      - "traefik.http.middlewares.minio.headers.customFrameOptionsValue=SAMEORIGIN"
+      - "traefik.http.middlewares.minio.headers.contentSecurityPolicy=frame-ancestors 'self' minio.$DOMAINNAME $DOMAINNAME"
+      - "traefik.http.middlewares.minio.headers.stsSeconds=155520011"
+      - "traefik.http.middlewares.minio.headers.stsPreload=true"
+      - "traefik.http.middlewares.minio.headers.contentTypeNosniff=true"
+      - "traefik.http.middlewares.minio.headers.browserXSSFilter=true"
+    image: minio/minio
+    container_name: minio
+    restart: unless-stopped
+    command: "minio server /data"
+    depends_on:
+      - traefik
+    volumes:
+      - $CONTAINERDATADIR/minio:/data
+    environment:
+      - MINIO_ROOT_USER_FILE=minioAccessKey
+      - MINIO_ROOT_PASSWORD_FILE=minioSecretKey
+      - MINIO_BROWSER=off
+    secrets:
+      - minioAccessKey
+      - minioSecretKey
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3

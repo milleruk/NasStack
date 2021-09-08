@@ -1,0 +1,20 @@
+services:
+  jackett:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jackett.rule=Host(`jackett.$DOMAINNAME`)"
+      - "traefik.http.routers.jackett.entrypoints=https"
+      - "traefik.http.services.jackett.loadbalancer.server.port=9117"
+    image: linuxserver/jackett
+    container_name: jackett
+    volumes:
+      - $CONTAINERDATADIR/jackett:/config
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+    network_mode: container:wireguard
+    depends_on:
+      - traefik
+      - wireguard
+    restart: unless-stopped

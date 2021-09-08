@@ -1,0 +1,23 @@
+{
+    "name": "nasstack/manager",
+    "description": "Manager for NASStack",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Michael Karbowiak",
+            "email": "michael@karbowiak.dk"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "league/container": "^3.3.5",
+        "new3den/console": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "NASStack\\": "src/"
+        }
+    }
+}

@@ -1,0 +1,21 @@
+services:
+  nzbget:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nzbget.rule=Host(`nzbget.$DOMAINNAME`)"
+      - "traefik.http.routers.nzbget.entrypoints=https"
+      - "traefik.http.services.nzbget.loadbalancer.server.port=6789"
+    image: linuxserver/nzbget
+    container_name: nzbget
+    volumes:
+      - $CONTAINERDATADIR/nzbget:/config
+      - $DATADIR:/data
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+    network_mode: container:wireguard
+    depends_on:
+      - traefik
+      - wireguard
+    restart: unless-stopped

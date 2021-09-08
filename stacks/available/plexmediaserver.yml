@@ -1,0 +1,49 @@
+secrets:
+  plexClaim:
+    file: $SECRETSDIR/plexClaim
+
+services:
+  plexmediaserver:
+    image: linuxserver/plex:latest
+    container_name: plexmediaserver
+    restart: unless-stopped
+    runtime: nvidia
+#    networks:
+#      - containerProxy
+    security_opt:
+      - no-new-privileges:true
+    network_mode: host
+#    ports:
+#      - "32400:32400/tcp"
+#      - "3005:3005/tcp"
+#      - "8324:8324/tcp"
+#      - "32469:32469/tcp"
+#      - "1900:1900/udp" # conflicts with xTeVe
+#      - "32410:32410/udp"
+#      - "32412:32412/udp"
+#      - "32413:32413/udp"
+#      - "32414:32414/udp"
+    volumes:
+      - $CONTAINERDATADIR/plex:/config
+      - $DATADIR:/data
+      - /dev/shm:/dev/shm:rw
+    environment:
+      TZ: $TZ
+      HOSTNAME: "plex"
+      PLEX_CLAIM_FILE: /run/secrets/plexClaim
+      PLEX_UID: $PUID
+      PLEX_GID: $PGID
+      VERSION: docker
+      NVIDIA_VISIBLE_DEVICES: all
+    secrets:
+      - plexClaim
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.plexmediaserver.entrypoints=https"
+      - "traefik.http.routers.plexmediaserver.rule=Host(`plex.$DOMAINNAME`)"
+      ## Middlewares
+      - "traefik.http.routers.plexmediaserver.middlewares=chain-no-auth@file"
+      ## HTTP Services
+      - "traefik.http.routers.plexmediaserver.service=plexmediaserver-svc"
+      - "traefik.http.services.plexms-svc.loadbalancer.server.port=32400"

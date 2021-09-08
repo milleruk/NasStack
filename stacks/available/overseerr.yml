@@ -1,0 +1,27 @@
+services:
+  overseerr:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.overseerr.rule=Host(`overseerr.$DOMAINNAME`)"
+      - "traefik.http.routers.overseerr.entrypoints=https"
+      - "traefik.http.services.overseerr.loadbalancer.server.port=5055"
+    image: linuxserver/overseerr
+    container_name: overseerr
+    volumes:
+      - $CONTAINERDATADIR/overseerr:/config
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+    networks:
+      - containerProxy
+    depends_on:
+      - traefik
+      - sonarr
+      - radarr
+      - plexmediaserver
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"

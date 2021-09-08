@@ -1,0 +1,16 @@
+services:
+  xteve:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.xteve.rule=Host(`xteve.$DOMAINNAME`)"
+      - "traefik.http.routers.xteve.entrypoints=https"
+      - "traefik.http.services.xteve.loadbalancer.server.port=34400"
+    image: dnsforge/xteve
+    container_name: xteve
+    volumes:
+      - $CONTAINERDATADIR/xteve:/home/xteve/conf
+      - $CONTAINERDATADIR/xteve/tmp:/tmp/xteve
+    network_mode: host
+    depends_on:
+      - traefik
+    restart: unless-stopped

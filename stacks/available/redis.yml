@@ -1,0 +1,16 @@
+services:
+  redis:
+    image: library/redis
+    container_name: redis
+    volumes:
+      - $CONTAINERDIR/config/redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - $CONTAINERDATADIR/containers/redis:/data
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    networks:
+      - containerProxy
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 20s
+      retries: 10
+    restart: unless-stopped

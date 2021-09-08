@@ -1,0 +1,21 @@
+services:
+  wireguard:
+    image: ghcr.io/linuxserver/wireguard:latest
+    container_name: wireguard
+    networks:
+      - containerProxy
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      - TZ=$TZ
+      - PUID=$PUID
+      - PGID=$PGID
+    restart: unless-stopped
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+      - net.ipv6.conf.default.disable_ipv6=1
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - $CONTAINERDIR/config/wireguard/wg0.conf:/config/wg0.conf
+      - /lib/modules:/lib/modules

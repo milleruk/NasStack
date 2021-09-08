@@ -1,0 +1,18 @@
+services:
+  tautulli:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.tautulli.rule=Host(`tautulli.$DOMAINNAME`)"
+      - "traefik.http.routers.tautulli.entrypoints=https"
+      - "traefik.http.services.tautulli.loadbalancer.server.port=8181"
+    image: linuxserver/tautulli
+    container_name: tautulli
+    volumes:
+      - $CONTAINERDATADIR/tautulli:/config
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+    networks:
+      - containerProxy
+    restart: unless-stopped

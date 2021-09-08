@@ -1,0 +1,30 @@
+services:
+  sonarr:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sonarr.rule=Host(`sonarr.$DOMAINNAME`)"
+      - "traefik.http.routers.sonarr.entrypoints=https"
+      - "traefik.http.services.sonarr.loadbalancer.server.port=8989"
+    image: mdhiggins/sonarr-sma:latest
+    container_name: sonarr
+    volumes:
+      - $CONTAINERDATADIR/sonarr:/config
+      - $DATADIR:/data
+      - $CONTAINERDIR/config/autoProcess.ini:/usr/local/bin/sma/sickbeard_mp4_automator/autoProcess.ini
+      - $CONTAINERDIR/config/autoProcess.ini:/usr/local/sma/autoProcess.ini
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      - SMA_UPDATE=true
+    devices:
+      - /dev/dri:/dev/dri
+    network_mode: container:wireguard
+    depends_on:
+      - traefik
+      - nzbget
+      - qbittorrent
+      - jackett
+      - nzbhydra
+      - wireguard
+    restart: unless-stopped

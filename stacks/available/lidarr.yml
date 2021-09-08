@@ -1,0 +1,25 @@
+services:
+  lidarr:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.lidarr.rule=Host(`lidarr.$DOMAINNAME`)"
+      - "traefik.http.routers.lidarr.entrypoints=https"
+      - "traefik.http.services.lidarr.loadbalancer.server.port=8686"
+    image: linuxserver/lidarr:nightly
+    container_name: lidarr
+    volumes:
+      - $CONTAINERDATADIR/lidarr:/config
+      - $DATADIR:/data
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+    network_mode: container:wireguard
+    depends_on:
+      - traefik
+      - nzbget
+      - qbittorrent
+      - jackett
+      - nzbhydra
+      - wireguard
+    restart: unless-stopped

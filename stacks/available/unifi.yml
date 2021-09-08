@@ -1,0 +1,22 @@
+services:
+  unifi:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.unifi.rule=Host(`unifi.$DOMAINNAME`)"
+      - "traefik.http.routers.unifi.entrypoints=https"
+      - "traefik.http.services.unifi.loadbalancer.server.port=8443"
+    image: linuxserver/unifi-controller:version-6.2.23
+    container_name: unifi
+    volumes:
+      - $CONTAINERDATADIR/unifi:/config
+      - $CONTAINERDIR/logs/unifi:/config/logs
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - TZ=$TZ
+      - HTTPS=ON
+      - PUID=$PUID
+      - PGID=$PGID
+    network_mode: host
+    depends_on:
+      - traefik
+    restart: unless-stopped

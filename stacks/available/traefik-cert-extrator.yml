@@ -1,0 +1,13 @@
+services:
+  traefik-cert-extractor:
+    image: ldez/traefik-certs-dumper
+    container_name: traefik-cert-extractor
+    entrypoint: traefik-certs-dumper file --watch --source $CONTAINERDIR/config/traefik/acme.json --dest $CONTAINERDIR/config/certs --version v2 --domain-subdir=true --crt-name=fullchain --key-name=privkey --crt-ext=.pem --key-ext=.pem
+    volumes:
+      - $CONTAINERDIR/config/traefik:/data/app
+      - $CONTAINERDIR/config/certs:/data/certs
+    networks:
+      - containerProxy
+    depends_on:
+      - traefik
+    restart: unless-stopped

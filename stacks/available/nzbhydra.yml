@@ -1,0 +1,20 @@
+services:
+  nzbhydra:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nzbhydra.rule=Host(`nzbhydra.$DOMAINNAME`)"
+      - "traefik.http.routers.nzbhydra.entrypoints=https"
+      - "traefik.http.services.nzbhydra.loadbalancer.server.port=5076"
+    image: linuxserver/nzbhydra2
+    container_name: nzbhydra
+    volumes:
+      - $CONTAINERDATADIR/nzbhydra:/config
+      - $DATADIR:/data
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+    network_mode: container:wireguard
+    depends_on:
+      - traefik
+      - wireguard
+    restart: unless-stopped

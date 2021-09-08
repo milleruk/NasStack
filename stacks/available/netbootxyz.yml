@@ -1,0 +1,23 @@
+services:
+  netbootxyz:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.netbootxyz.rule=Host(`netbootxyz.$DOMAINNAME`)"
+      - "traefik.http.routers.netbootxyz.entrypoints=https"
+      - "traefik.http.services.netbootxyz.loadbalancer.server.port=3000"
+    image: linuxserver/netbootxyz
+    container_name: netbootxyz
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+    volumes:
+      - $CONTAINERDATADIR/pxe:/config
+      - $CONTAINERDATADIR/pxe/assets:/assets
+    networks:
+      - containerProxy
+    ports:
+      #- 3000:3000 # WebUI port
+      - "69:69/udp"
+    depends_on:
+      - traefik
+    restart: unless-stopped

@@ -1,0 +1,19 @@
+services:
+  archivebox:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.archivebox.rule=Host(`archivebox.$DOMAINNAME`)"
+      - "traefik.http.routers.archivebox.entrypoints=https"
+      - "traefik.http.services.archivebox.loadbalancer.server.port=8080"
+    image: archivebox/archivebox
+    container_name: archivebox
+    command: archivebox server 0.0.0.0:8080
+    volumes:
+      - $CONTAINERDATA/archivebox:/data
+    networks:
+      - containerProxy
+    ports:
+      - 8189:8080
+    depends_on:
+      - traefik
+    restart: unless-stopped

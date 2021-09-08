@@ -1,0 +1,32 @@
+services:
+  samba:
+    image: dperson/samba
+    container_name: samba
+    environment:
+      - TZ=$TZ
+      - USERID=$PUID
+      - GROUPID=$PGID
+      - RECYCLE=false
+    volumes:
+      - $DATADIR:/data
+    networks:
+      - containerProxy
+    ports:
+      - "137:137/udp"
+      - "138:138/udp"
+      - "139:139/tcp"
+      - "445:445/tcp"
+    command: >
+      -n
+      -w WORKGROUP
+      -s "TimeMachine;/data/timemachine;yes;no;yes;all;none;media;TimeMachine Backup"
+      -s "data;/data;yes;no;yes;all;none;media;main storage"
+      -g "fruit:model = RackMac"
+      -g "fruit:advertise_fullsync = true"
+      -g "fruit:aapl = true"
+      -g "fruit:metadata = stream"
+      -g "fruit:posix_rename = yes"
+      -g "fruit:veto_appledouble = no"
+      -g "fruit:wipe_intentionally_left_blank_rfork = yes"
+      -g "fruit:delete_empty_adfiles = yes"
+    restart: unless-stopped

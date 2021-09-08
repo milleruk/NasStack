@@ -1,0 +1,18 @@
+services:
+  antennas:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.antennas.rule=Host(`ant.$DOMAINNAME`)"
+      - "traefik.http.routers.antennas.entrypoints=https"
+      - "traefik.http.services.antennas.loadbalancer.server.port=5004"
+    image: thejf/antennas
+    container_name: antennas
+    environment:
+      - ANTENNAS_URL=http://$SERVERIP:5004
+      - TVHEADEND_URL=http://$SERVERIP:9981
+      - TUNER_COUNT=4
+    network_mode: host
+    depends_on:
+      - traefik
+      - tvheadend
+    restart: unless-stopped

@@ -1,0 +1,22 @@
+services:
+  qbittorrent:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.qbittorrent.rule=Host(`qbittorrent.$DOMAINNAME`)"
+      - "traefik.http.routers.qbittorrent.entrypoints=https"
+      - "traefik.http.services.qbittorrent.loadbalancer.server.port=8080"
+    image: linuxserver/qbittorrent
+    container_name: qbittorrent
+    volumes:
+      - $CONTAINERDATADIR/qbittorrent:/config
+      - $DATADIR:/data
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - UMASK=0
+      - TZ=$TZ
+    network_mode: container:wireguard
+    depends_on:
+      - traefik
+      - wireguard
+    restart: unless-stopped

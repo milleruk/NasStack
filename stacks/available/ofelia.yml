@@ -1,0 +1,13 @@
+# Refer to https://github.com/mcuadros/ofelia for more information
+---
+services:
+  ofelia:
+    image: mcuadros/ofelia
+    container_name: ofelia
+    restart: unless-stopped
+    command: daemon --docker
+    networks:
+      - containerProxy
+    volumes:
+      - $CONTAINERDIR/config/ofelia/ofelia.ini:/etc/ofelia/config.ini
+      - /var/run/docker.sock:/var/run/docker.sock:ro

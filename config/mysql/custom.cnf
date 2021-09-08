@@ -1,0 +1,9 @@
+[mysqld]
+    bind-address = 0.0.0.0
+    innodb_file_per_table = 1
+    innodb_buffer_pool_size = 4G
+    innodb_buffer_pool_load_at_startup = ON
+    innodb_flush_method = O_DIRECT
+    innodb_flush_log_at_trx_commit = 0
+    innodb_force_recovery = 0
+    skip-innodb_doublewrite
